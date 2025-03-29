@@ -1,0 +1,73 @@
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    firstname VARCHAR(100) NOT NULL,
+    lastname VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role ENUM('admin', 'staff') NOT NULL DEFAULT 'staff',
+    status BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE borrowers (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    firstname VARCHAR(100) NOT NULL,
+    lastname VARCHAR(100) NOT NULL,
+    middlename VARCHAR(100),
+    address TEXT NOT NULL,
+    contact_no VARCHAR(20) NOT NULL,
+    email VARCHAR(100),
+    tax_id VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE loan_types (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    type_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE loan_plans (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    months INT NOT NULL,
+    interest_percentage DECIMAL(5,2) NOT NULL,
+    penalty_rate DECIMAL(5,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE loan_list (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    ref_no VARCHAR(50) UNIQUE NOT NULL,
+    borrower_id INT NOT NULL,
+    loan_type_id INT NOT NULL,
+    plan_id INT NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    purpose TEXT,
+    status TINYINT NOT NULL DEFAULT 0,
+    date_released DATE,
+    total_payable DECIMAL(15,2) NOT NULL,
+    monthly_payment DECIMAL(15,2) NOT NULL,
+    total_paid DECIMAL(15,2) DEFAULT 0,
+    next_payment_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (borrower_id) REFERENCES borrowers(id),
+    FOREIGN KEY (loan_type_id) REFERENCES loan_types(id),
+    FOREIGN KEY (plan_id) REFERENCES loan_plans(id)
+);
+
+CREATE TABLE payments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    loan_id INT NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    penalty_amount DECIMAL(15,2) DEFAULT 0,
+    payee VARCHAR(100) NOT NULL,
+    date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (loan_id) REFERENCES loan_list(id)
+);
